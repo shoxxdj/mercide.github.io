@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Merci de</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        img {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <img id="randomImage" src="" alt="Random Image">
+    <script>
+        // Function to get a random image from the /img directory
+        async function getRandomImage() {
+            const imgDirectory = '/img/';
+            const response = await fetch(imgDirectory);
+            const text = await response.text();
+
+            // Parse the response to extract image filenames
+            const parser = new DOMParser();
+            const htmlDocument = parser.parseFromString(text, 'text/html');
+            const imageElements = htmlDocument.querySelectorAll('a[href$=".jpg"], a[href$=".jpeg"], a[href$=".png"], a[href$=".gif"]');
+
+            if (imageElements.length === 0) {
+                console.error('No images found in the "/img" directory.');
+                return;
+            }
+
+            // Convert the NodeList of image elements to an array of filenames
+            const imageFilenames = Array.from(imageElements).map(element => element.getAttribute('href'));
+            
+            // Select a random image filename
+            const randomIndex = Math.floor(Math.random() * imageFilenames.length);
+            const randomImage = imgDirectory + imageFilenames[randomIndex];
+            return randomImage;
+        }
+
+        // Set the source of the image element to a random image
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const randomImageElement = document.getElementById('randomImage');
+                const randomImageSrc = await getRandomImage();
+                if (randomImageSrc) {
+                    randomImageElement.setAttribute('src', randomImageSrc);
+                }
+            } catch (error) {
+                console.error('Error fetching and displaying the random image:', error);
+            }
+        });
+    </script>
+</body>
+</html>
